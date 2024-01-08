@@ -80,6 +80,7 @@ setup(
     entry_points={
         "console_scripts": [
             "looper = looper.__main__:main",
+            "looper-pydantic-argparse = looper.pydantic_argparse_demo:main",
             "divvy = looper.__main__:divvy_main",
         ],
     },
