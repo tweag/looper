@@ -1,30 +1,17 @@
+import argparse
 import os
 import sys
-from typing import Optional
+from typing import List, Optional, Tuple
 
+import logmuse
 import pydantic
 import pydantic_argparse
-from divvy import select_divvy_config
-
-from .utils import (
-    dotfile_path,
-    enrich_args_via_cfg,
-    read_looper_dotfile,
-)
-
-
-# Copy-and-pasted imports, not everything is needed
-
-import argparse
-import logmuse
-import os
-import sys
 import yaml
-
 from eido import inspect_project
 from pephubclient import PEPHubClient
-from typing import Tuple, List
 from ubiquerg import VersionInHelpParser
+
+from divvy import select_divvy_config
 
 from . import __version__
 from .const import *
@@ -36,25 +23,26 @@ from .project import Project, ProjectContext
 from .utils import (
     dotfile_path,
     enrich_args_via_cfg,
-    is_registry_path,
-    read_looper_dotfile,
-    read_looper_config_file,
-    read_yaml_file,
-    initiate_looper_config,
     init_generic_pipeline,
+    initiate_looper_config,
+    is_registry_path,
+    read_looper_config_file,
+    read_looper_dotfile,
+    read_yaml_file,
 )
 
 
 ## pydantic model for `looper run` command
 class RunParser(pydantic.BaseModel):
-
     # arguments
     looper_config: str = pydantic.Field(description="Looper project configuration file")
+
 
 ## pydantic model for `looper run` command
 class CheckParser(pydantic.BaseModel):
     # arguments
     looper_config: str = pydantic.Field(description="Looper project configuration file")
+
 
 ## pydantic model for base command
 class TopLevelParser(pydantic.BaseModel):
@@ -62,14 +50,49 @@ class TopLevelParser(pydantic.BaseModel):
     run: Optional[RunParser] = pydantic.Field(description="Run a looper project")
     check: Optional[CheckParser] = pydantic.Field(description="Check a looper project")
     ## these are required to make progress with the `hello_looper` example, but probably shouldn't be here
-    # config_file: Optional[str] = pydantic.Field(description="Project configuration file")
-    # pep_config: Optional[str] = pydantic.Field(description="PEP configuration file")
-    # output_dir: Optional[str] = pydantic.Field(description="Output directory")
-    # sample_pipeline_interfaces: Optional[str] = pydantic.Field(description="Sample pipeline interfaces definition")
-    # project_pipeline_interfaces: Optional[str] = pydantic.Field(description="Project pipeline interfaces definition")
-    # amend: Optional[bool] = pydantic.Field(description="Amend stuff?")
-    # sel_flag: Optional[bool] = pydantic.Field(description="Selection flag")
-    # exc_flag: Optional[bool] = pydantic.Field(description="Exclusion flag")
+    config_file: Optional[str] = pydantic.Field(
+        description="Project configuration file"
+    )
+    pep_config: Optional[str] = pydantic.Field(description="PEP configuration file")
+    output_dir: Optional[str] = pydantic.Field(description="Output directory")
+    sample_pipeline_interfaces: Optional[str] = pydantic.Field(
+        description="Sample pipeline interfaces definition"
+    )
+    project_pipeline_interfaces: Optional[str] = pydantic.Field(
+        description="Project pipeline interfaces definition"
+    )
+    amend: Optional[bool] = pydantic.Field(description="Amend stuff?")
+    sel_flag: Optional[bool] = pydantic.Field(description="Selection flag")
+    exc_flag: Optional[bool] = pydantic.Field(description="Exclusion flag")
+
+    time_delay: Optional[int] = pydantic.Field(
+        0, description="Time delay in seconds between job submissions"
+    )
+    command_extra: Optional[str] = pydantic.Field(
+        description="String to append to every command"
+    )
+    command_extra_override: Optional[str] = pydantic.Field(
+        description="Same as command-extra, but overrides values in PEP"
+    )
+    ignore_flags: Optional[bool] = pydantic.Field(
+        description="Ignore run status flags? Default=False"
+    )
+    lumpn: Optional[int] = pydantic.Field(
+        description="Number of commands to batch into one job"
+    )
+    lump: Optional[int] = pydantic.Field(
+        description="Total input file size (GB) to batch into one job"
+    )
+    limit: Optional[int] = pydantic.Field(description="Limit to n samples")
+    skip: Optional[int] = pydantic.Field(description="Skip samples by numerical index")
+    divvy: Optional[str] = pydantic.Field(
+        None,
+        description="Path to divvy configuration file. Default=$DIVCFG env "
+        "variable. Currently: {}".format(os.getenv("DIVCFG", None) or "not set"),
+    )
+    dry_run: Optional[bool] = pydantic.Field(
+        False, description="Don't actually submit the jobs.  Default=False"
+    )
 
 
 def _proc_resources_spec(args):
@@ -88,7 +111,9 @@ def _proc_resources_spec(args):
     """
     spec = getattr(args, "compute", None)
     try:
-        settings_data = read_yaml_file(args.settings) if hasattr(args, "settings") else {}
+        settings_data = (
+            read_yaml_file(args.settings) if hasattr(args, "settings") else {}
+        )
     except yaml.YAMLError:
         _LOGGER.warning(
             "Settings file ({}) does not follow YAML format,"
@@ -119,7 +144,7 @@ def main() -> None:
         model=TopLevelParser,
         prog="looper",
         description="pydantic-argparse demo",
-        add_help=True
+        add_help=True,
     )
     args = parser.parse_typed_args()
     print(args)
@@ -209,6 +234,7 @@ def main() -> None:
                     )
                 )
                 raise
+
 
 if __name__ == "__main__":
     main()
