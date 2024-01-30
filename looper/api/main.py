@@ -1,11 +1,13 @@
 from argparse import ArgumentParser, Namespace
 import secrets
+import io
 from typing import Dict, TypeAlias
 
 import fastapi
-from fastapi import FastAPI
 import pydantic
 import uvicorn
+
+from fastapi import FastAPI
 
 from looper.cli_pydantic import run_looper
 from looper.command_models.commands import SUPPORTED_COMMANDS, TopLevelParser
@@ -16,18 +18,21 @@ stdout_redirects.enable_proxy()
 
 JobId: TypeAlias = str
 
+
 class Job(pydantic.BaseModel):
     id: JobId = pydantic.Field(
         default_factory=lambda: secrets.token_urlsafe(4),
-        description="The unique identifier of the job"
+        description="The unique identifier of the job",
     )
     status: str = pydantic.Field(
         default="in_progress",
-        description="The current status of the job. Can be either `in_progress` or `completed`."
+        description="The current status of the job. Can be either `in_progress` or `completed`.",
     )
-    console_output: str | None = pydantic.Field(default=None,
-        description="Console output produced by `looper` while performing the requested action"
+    console_output: str | None = pydantic.Field(
+        default=None,
+        description="Console output produced by `looper` while performing the requested action",
     )
+
 
 app = FastAPI(validate_model=True)
 jobs: Dict[str, Job] = {}
