@@ -203,3 +203,13 @@ class ArgumentEnum(enum.Enum):
         default=(str, None),
         description="Path to pipestat files.",
     )
+    SEL_ATTR = Argument(
+        name="sel_attr",
+        default=(str, "toggle"),
+        description="Attribute for sample exclusion OR inclusion.",
+    )
+    SEL_INCL = Argument(
+        name="sel_incl",
+        default=(List, []),
+        description="Include only samples with these values.",
+    )

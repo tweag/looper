@@ -97,3 +97,5 @@ class TopLevelParser(pydantic.BaseModel):
     verbosity: Optional[int] = ArgumentEnum.VERBOSITY.value.with_reduced_default()
     logdev: Optional[bool] = ArgumentEnum.LOGDEV.value.with_reduced_default()
     pipestat: Optional[str] = ArgumentEnum.PIPESTAT.value.with_reduced_default()
+    sel_attr: Optional[str] = ArgumentEnum.SEL_ATTR.value.with_reduced_default()
+    sel_incl: Optional[List[str]] = ArgumentEnum.SEL_INCL.value.with_reduced_default()
