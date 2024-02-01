@@ -102,7 +102,7 @@ async def main_endpoint(
 
 @app.get(
     "/status/{job_id}",
-    summary="Get Job Status",
+    summary="Get job status",
     description="Retrieve the status of a job based on its unique identifier.",
 )
 async def get_status(job_id: JobId) -> Job:
