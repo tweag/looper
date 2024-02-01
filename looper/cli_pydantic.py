@@ -146,11 +146,11 @@ def run_looper(args: TopLevelParser, parser: ArgumentParser):
 
     with ProjectContext(
         prj=p,
-        selector_attribute="toggle",
-        selector_include=None,
-        selector_exclude=None,
-        selector_flag=None,
-        exclusion_flag=None,
+        selector_attribute=args.sel_attr,
+        selector_include=args.sel_incl,
+        selector_exclude=args.sel_excl,
+        selector_flag=args.sel_flag,
+        exclusion_flag=args.exc_flag,
     ) as prj:
         if subcommand_name == "run":
             run = Runner(prj)
