@@ -87,10 +87,9 @@ def create_argparse_namespace(top_level_model: TopLevelParser) -> Namespace:
 @app.post(
     "/",
     status_code=202,
-    summary="Run Looper in Background",
-    description="Create a new job, process data with the specified "
-    "`top_level_model`, and initiate a background asynchronous task to run "
-    "looper.",
+    summary="Run Looper",
+    description="Start a `looper` command with arguments specified in "
+    "`top_level_model` in the background and return a job identifier.",
 )
 async def main_endpoint(
     top_level_model: TopLevelParser, background_tasks: fastapi.BackgroundTasks
